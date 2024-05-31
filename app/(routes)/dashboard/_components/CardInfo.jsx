@@ -32,7 +32,7 @@ function CardInfo({budgetList}) {
        
         <div className='p-7 border rounded-lg flex items-center justify-between'>
             <div>
-                <h2 className='text-sm'>Toatal Budget</h2>
+                <h2 className='text-sm'>Total Budget</h2>
                 <h2 className='font-bold text-2xl'>${totalBudget}</h2>
             </div>
             <PiggyBank className='bg-primary p-3 h-12 w-12 rounded-full text-white'/>
@@ -40,7 +40,7 @@ function CardInfo({budgetList}) {
 
         <div className='p-7 border rounded-lg flex items-center justify-between'>
             <div>
-                <h2 className='text-sm'>Toatal Spend</h2>
+                <h2 className='text-sm'>Total Spend</h2>
                 <h2 className='font-bold text-2xl'>${totalSpend}</h2>
             </div>
             <ReceiptText className='bg-primary p-3 h-12 w-12 rounded-full text-white'/>
