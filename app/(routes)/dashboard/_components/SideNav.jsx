@@ -22,9 +22,9 @@ function SideNav() {
         },
         {
             id:3,
-            name: 'Split Bills',
+            name: 'Expenses',
             icon: ReceiptText,
-            path: '/dashboard/splitBill'
+            path: '/dashboard/expenses'
         },
         {
             id:4,
