@@ -17,8 +17,8 @@ function Header() {
         height={100}/>
         {isSignedIn?
         <UserButton/>:
-        <Link href={'/sign-in'}>
-        <Button>Get Started</Button>
+        <Link href={'/sign-in?redirectUrl=/dashboard'}>
+        <Button>Ready to Begin?</Button>
         </Link>
         }
     </div>
