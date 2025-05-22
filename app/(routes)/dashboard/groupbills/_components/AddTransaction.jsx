@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { User, Wallet, ListChecks, Equal, Split } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 function AddTransaction({ groupId, participants, refreshData }) {
   const [payerId, setPayerId] = useState("");
@@ -13,7 +17,6 @@ function AddTransaction({ groupId, participants, refreshData }) {
   const [selectedParticipants, setSelectedParticipants] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Initialize with all participant IDs (excluding payer when set)
   useEffect(() => {
     setSelectedParticipants(
       participants.filter(p => p.id !== payerId).map(p => p.id)
@@ -26,7 +29,6 @@ function AddTransaction({ groupId, participants, refreshData }) {
       return;
     }
 
-    // Validate at least one participant is selected for custom split
     if (splitType === "custom" && selectedParticipants.length === 0) {
       toast.error("Please select at least one participant!");
       return;
@@ -40,7 +42,7 @@ function AddTransaction({ groupId, participants, refreshData }) {
         body: JSON.stringify({
           groupId,
           payerId,
-          amount: Number(amount).toFixed(2), // Ensure proper decimal format
+          amount: Number(amount).toFixed(2),
           description,
           splitType,
           selectedParticipants: splitType === "equal" 
@@ -50,16 +52,12 @@ function AddTransaction({ groupId, participants, refreshData }) {
       });
 
       const data = await res.json();
-      
       if (!res.ok) throw new Error(data.error || "Failed to add transaction");
 
       toast.success("Transaction Added Successfully!");
-      
-      // Reset form
       setAmount("");
       setDescription("");
       
-      // Refresh parent data with error handling
       try {
         await refreshData();
       } catch (refreshError) {
@@ -76,119 +74,142 @@ function AddTransaction({ groupId, participants, refreshData }) {
   };
 
   return (
-    <div className="border p-5 rounded-lg">
-      <h2 className="font-bold text-lg">Add Expense</h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <Wallet className="h-6 w-6 text-purple-600" />
+        Add New Expense
+      </h2>
 
       {/* Payer Selection */}
-      <div className="mt-3">
-        <label className="block font-medium">Who Paid?</label>
-        <select
-          className="w-full border p-2 rounded-md mt-1"
+      <div className="mt-5 space-y-2">
+        <Label className="text-gray-700 flex items-center gap-2">
+          <User className="h-4 w-4" />
+          Who Paid?
+        </Label>
+        <Select
           value={payerId}
-          onChange={(e) => {
-            setPayerId(e.target.value);
-            // Auto-exclude payer from participants
+          onValueChange={(value) => {
+            setPayerId(value);
             if (splitType === "custom") {
               setSelectedParticipants(
                 participants
-                  .filter(p => p.id !== e.target.value)
+                  .filter(p => p.id !== value)
                   .map(p => p.id)
               );
             }
           }}
           disabled={loading}
         >
-          <option value="">Select Payer</option>
-          {participants.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select payer" />
+          </SelectTrigger>
+          <SelectContent>
+            {participants.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Amount Input */}
-      <div className="mt-3">
-        <label className="block font-medium">Amount</label>
-        <Input
-          type="number"
-          min="0.01"
-          step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="0.00"
-          disabled={loading}
-        />
+      <div className="mt-4 space-y-2">
+        <Label className="text-gray-700">Amount</Label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+          <Input
+            type="number"
+            min="0.01"
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+            disabled={loading}
+            className="pl-8"
+          />
+        </div>
       </div>
 
       {/* Description Input */}
-      <div className="mt-3">
-        <label className="block font-medium">Description</label>
+      <div className="mt-4 space-y-2">
+        <Label className="text-gray-700 flex items-center gap-2">
+          <ListChecks className="h-4 w-4" />
+          Description
+        </Label>
         <Input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="What was this for?"
+          placeholder="Dinner, Groceries, Movie tickets..."
           disabled={loading}
         />
       </div>
 
       {/* Split Type Toggle */}
-      <div className="mt-3">
-        <label className="block font-medium">Split Method</label>
-        <div className="flex gap-3">
+      <div className="mt-4 space-y-2">
+        <Label className="text-gray-700">Split Method</Label>
+        <div className="flex gap-2">
           <Button
             variant={splitType === "equal" ? "default" : "outline"}
             onClick={() => setSplitType("equal")}
             disabled={loading}
+            className="flex-1 gap-2"
           >
-            Equal Split
+            <Equal className="h-4 w-4" />
+            Equal
           </Button>
           <Button
             variant={splitType === "custom" ? "default" : "outline"}
             onClick={() => setSplitType("custom")}
             disabled={loading}
+            className="flex-1 gap-2"
           >
-            Custom Split
+            <Split className="h-4 w-4" />
+            Custom
           </Button>
         </div>
       </div>
 
       {/* Participant Selection */}
       {splitType === "custom" && (
-        <div className="mt-3 space-y-2">
-          <label className="block font-medium">Split Between:</label>
-          {participants
-            .filter(p => p.id !== payerId) // Exclude payer
-            .map((p) => (
-              <label key={p.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedParticipants.includes(p.id)}
-                  onChange={() => {
-                    setSelectedParticipants(prev =>
-                      prev.includes(p.id)
-                        ? prev.filter(id => id !== p.id)
-                        : [...prev, p.id]
-                    );
-                  }}
-                  disabled={loading}
-                />
-                {p.name}
-              </label>
-            ))}
+        <div className="mt-4 space-y-3">
+          <Label className="text-gray-700">Split Between:</Label>
+          <div className="space-y-2 max-h-40 overflow-y-auto p-2 border rounded-lg">
+            {participants
+              .filter(p => p.id !== payerId)
+              .map((p) => (
+                <div key={p.id} className="flex items-center gap-3">
+                  <Checkbox
+                    id={`participant-${p.id}`}
+                    checked={selectedParticipants.includes(p.id)}
+                    onCheckedChange={(checked) => {
+                      setSelectedParticipants(prev =>
+                        checked
+                          ? [...prev, p.id]
+                          : prev.filter(id => id !== p.id)
+                      );
+                    }}
+                    disabled={loading}
+                  />
+                  <Label htmlFor={`participant-${p.id}`} className="font-normal">
+                    {p.name}
+                  </Label>
+                </div>
+              ))}
+          </div>
         </div>
       )}
 
       {/* Submit Button */}
       <Button
         onClick={handleAddTransaction}
-        className="mt-4 w-full"
+        className="mt-6 w-full h-12 text-lg"
         disabled={loading || !payerId || !amount}
       >
         {loading ? (
           <span className="flex items-center gap-2">
             <span className="animate-spin">↻</span>
-            Processing...
+            Adding Expense...
           </span>
         ) : (
           "Add Expense"

@@ -1,10 +1,10 @@
 "use client"
 import { UserButton } from '@clerk/nextjs'
-import { LayoutGrid, PiggyBank, ReceiptText, ShieldCheck } from 'lucide-react'
+import { LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, LogOut } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 function SideNav() {
     const menuList = [
@@ -34,35 +34,57 @@ function SideNav() {
         }
     ]
 
-    const path=usePathname();
-    useEffect(()=>{
-        console.log(path)
-    },[path]) 
-  return (
-    <div className='h-screen p-5 border shadow-sm'>
-        <Image src='/spliteasy.png'
-        alt='logo'
-        width={160}
-        height={100}/>
+    const path = usePathname();
 
-        <div className='mt-5'>
-            {menuList.map((menu, index)=>(
-                <Link href={menu.path}>
-                <h2 className={`flex gap-2 items-center text-gray-500 font-medium mb-2 p-5 cursor-pointer rounded-md hover:text-primary hover:bg-blue-100
-                ${path==menu.path && 'text-primary bg-blue-100'}
-                `}>
-                    <menu.icon/>
-                    {menu.name}
-                </h2>
-                </Link>
-            ))}
+    return (
+        <div className='fixed left-0 top-0 h-screen w-72 p-5 border-r shadow-sm bg-gradient-to-b from-purple-50 to-blue-50 flex flex-col z-20'>
+            {/* Logo */}
+            <div className='p-4 mb-8 pt-6'>  {/* Added pt-6 to account for header height */}
+                <Image 
+                    src='/spliteasy.png'
+                    alt='logo'
+                    width={180}
+                    height={120}
+                    className='object-contain'
+                />
+            </div>
+
+            {/* Menu Items */}
+            <div className='flex-1 space-y-3'>
+                {menuList.map((menu)=>(
+                    <Link href={menu.path} key={menu.id}>
+                        <div className={`flex items-center gap-4 p-4 rounded-xl transition-all text-lg
+                            ${path === menu.path 
+                                ? 'bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold shadow-md'
+                                : 'text-gray-700 hover:bg-white hover:text-purple-600 hover:shadow-sm'
+                            }`}
+                        >
+                            <menu.icon className='h-6 w-6'/>
+                            <span>{menu.name}</span>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+
+            {/* User Profile */}
+            <div className='mt-auto p-4 border-t border-gray-200'>
+                <div className='flex items-center gap-4 p-3 rounded-lg hover:bg-white transition-all'>
+                    <div className='relative h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm'>
+                        <UserButton appearance={{
+                            elements: {
+                                userButtonAvatarBox: "h-10 w-10"
+                            }
+                        }}/>
+                    </div>
+                    <div className='flex-1'>
+                        <p className='text-base font-medium'>Profile</p>
+                        <p className='text-sm text-gray-500'>View account</p>
+                    </div>
+                    <LogOut className='h-5 w-5 text-gray-500' />
+                </div>
+            </div>
         </div>
-        <div className='fixed bottom-10 p-5 flex gap-2 items-center'>
-            <UserButton/>
-            Profile
-        </div>
-    </div>
-  )
+    )
 }
 
 export default SideNav

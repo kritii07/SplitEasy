@@ -32,7 +32,7 @@ function Dashboardlayout({ children }) {
       <div className="fixed md:w-64 hidden md:block">
         <SideNav />
       </div>
-      <div className="md:ml-64 ">
+      <div className="md:ml-[18rem] ml-[20rem] pt-16 ">
         <DashboardHeader />
         {children}
       </div>

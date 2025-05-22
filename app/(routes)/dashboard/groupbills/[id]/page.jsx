@@ -6,6 +6,8 @@ import AddTransaction from "../_components/AddTransaction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { RefreshCw, Trash2, User, ArrowRight, History } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GroupDetails() {
   const { id } = useParams();
@@ -20,43 +22,11 @@ export default function GroupDetails() {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
-  
   const fetchSettlements = async () => {
     const res = await fetch(`/api/groupbills/get-settlements?groupId=${id}`);
     const data = await res.json();
     setSettlements(data);
   };
-
-  // const handleSettle = async (split) => {
-  //   try {
-  //     const res = await fetch('/api/groupbills/settle-amount', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({
-  //         groupId: id,
-  //         payerId: split.payerId,
-  //         receiverId: split.receiverId,
-  //         amount: split.amount
-  //       }),
-  //     });
-  
-  //     const data = await res.json();
-      
-  //     if (!res.ok) throw new Error(data.error || 'Failed to settle');
-      
-  //     toast.success('Amount settled successfully');
-      
-  //     // Update UI state immediately
-  //     setSplits(prev => prev.filter(s => 
-  //       !(s.payerId === split.payerId && 
-  //         s.receiverId === split.receiverId)
-  //     ));
-      
-  //     setSettlements(prev => [data.settlement, ...prev]);
-  //   } catch (error) {
-  //     toast.error(error.message);
-  //   }
-  // };
 
   const handleDeleteGroup = async () => {
     if (!confirm("Permanently delete this group and all its data?")) return;
@@ -77,7 +47,6 @@ export default function GroupDetails() {
   
       toast.success("Group deleted successfully");
       window.location.href = "/dashboard/groupbills";
-
     } catch (error) {
       console.error("Deletion Error:", error);
       toast.error(`Deletion failed: ${error.message}`);
@@ -131,7 +100,6 @@ export default function GroupDetails() {
     setLoadingSplits(true);
     
     try {
-      // Add cache-busting parameter
       const res = await fetch(`/api/groupbills/get-splits?groupId=${id}&t=${Date.now()}`, {
         cache: "no-store",
         headers: {
@@ -201,207 +169,268 @@ export default function GroupDetails() {
   }, [id]);
 
   if (loading) return (
-    <div className="p-10 flex justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-10 w-64" />
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-24" />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="border rounded-lg p-4">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </div>
+
+        <div className="border rounded-lg p-4">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 
   if (!group) return (
-    <div className="p-10">
+    <div className="p-6">
       <p className="text-red-500">Group not found.</p>
     </div>
   );
 
   return (
-    <div className="p-10">
-      <div className="flex justify-between items-start">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6 space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="font-bold text-3xl">{group.name}</h2>
-          <p className="text-gray-500 mt-2">Members: {participants.length}</p>
+          <h1 className="text-4xl font-bold text-gray-800">{group.name}</h1>
+          <div className="flex items-center gap-2 mt-2">
+            <User className="h-5 w-5 text-purple-600" />
+            <span className="text-lg text-purple-700">
+              {participants.length} member{participants.length !== 1 ? 's' : ''}
+            </span>
+          </div>
         </div>
-        <button
-          onClick={refreshAllData}
-          className="flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
-          disabled={isRefreshing}
-        >
-          {isRefreshing ? (
-            <>
-              <svg
-                className="animate-spin h-4 w-4 text-gray-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
-                ></path>
-              </svg>
-              Refreshing...
-            </>
-          ) : (
-            <>🔄 Refresh All</>
-          )}
-        </button>
-
-        <button
-          onClick={handleDeleteGroup}
-          disabled={isDeleting}
-          className={`flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md ${isDeleting ? 'bg-gray-100' : 'bg-red-100 hover:bg-red-200'} text-red-600`}
-        >
-          {isDeleting ? (
-            <>
-              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Deleting...
-            </>
-          ) : (
-            <>
-              🗑️ Delete Group
-            </>
-          )}
-        </button>
-
+        
+        <div className="flex gap-3 w-full md:w-auto">
+          <Button
+            variant="outline"
+            className="bg-white hover:bg-purple-100 text-purple-700 border-purple-300"
+            size="sm"
+            onClick={refreshAllData}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Refresh
+          </Button>
+          
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDeleteGroup}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="mr-2 h-4 w-4" />
+            )}
+            Delete Group
+          </Button>
+        </div>
       </div>
 
-      <div className="mt-5 border p-5 rounded-lg">
-        <h3 className="font-bold text-lg">Group Members</h3>
-        <ul className="mt-2">
-          {participants.length > 0 ? (
-            participants.map((member) => (
-              <li key={member.id} className="p-2 border-b">
-                {member.name}
-              </li>
-            ))
-          ) : (
-            <p>No members found.</p>
-          )}
-        </ul>
+      {/* Members and Transactions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Members Box */}
+        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Group Members</h2>
+            <span className="text-sm px-3 py-1 bg-purple-100 text-purple-800 rounded-full">
+              {participants.length}
+            </span>
+          </div>
+          <div className="space-y-4">
+            {participants.length > 0 ? (
+              participants.map((member) => (
+                <div key={member.id} className="flex items-center gap-4 p-3 hover:bg-purple-50 rounded-lg transition-colors">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold">
+                    {member.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">{member.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {member.email}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No members found</p>
+            )}
+          </div>
+        </div>
+
+        {/* Transactions Box */}
+        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Recent Transactions</h2>
+            <span className="text-sm px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+              {transactions.length}
+            </span>
+          </div>
+          <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+            {transactions.length > 0 ? (
+              transactions.map((transaction) => (
+                <div 
+                  key={transaction.id} 
+                  className="flex justify-between items-center p-3 hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  <div>
+                    <p className="font-medium text-gray-800">{transaction.description || "No description"}</p>
+                    <p className="text-xs text-gray-500">
+                      Paid by {transaction.payerName}
+                    </p>
+                  </div>
+                  <span className="font-bold text-blue-600">₹{transaction.amount}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No transactions yet</p>
+            )}
+          </div>
+          <div className="mt-4 flex justify-center">
+            <Button 
+              variant="outline"
+              className="bg-white hover:bg-blue-100 text-blue-600 border-blue-300"
+              size="sm" 
+              onClick={() => document.getElementById('add-transaction')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Add Transaction
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-5 border p-5 rounded-lg">
-        <h3 className="font-bold text-lg">Transactions</h3>
-        {transactions.length > 0 ? (
-          <ul className="mt-2 max-h-60 overflow-y-auto">
-            {transactions.map((transaction) => (
-              <li key={transaction.id} className="p-2 border-b">
-                <strong>{transaction.payerName || "Unknown"}</strong> paid ₹{transaction.amount}
-                <span className="text-gray-500"> ({transaction.description})</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No transactions found.</p>
-        )}
+      {/* Add Transaction Component */}
+      <div id="add-transaction">
+        <AddTransaction
+          groupId={id}
+          participants={participants}
+          refreshData={refreshAllData} 
+        />
       </div>
 
-      <AddTransaction
-        groupId={id}
-        participants={participants}
-        refreshData={refreshAllData} 
-      />
-
-      <div className="mt-5 border p-5 rounded-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">Who Owes Whom</h3>
-          <button
+      {/* Balances Box */}
+      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Balances</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-purple-600 hover:bg-purple-50"
             onClick={fetchSplits}
-            className="flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
             disabled={loadingSplits}
           >
             {loadingSplits ? (
-              <>
-                <svg
-                  className="animate-spin h-4 w-4 text-gray-600"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
-                  ></path>
-                </svg>
-                Refreshing...
-              </>
+              <RefreshCw className="h-4 w-4 animate-spin" />
             ) : (
-              <>🔄 Refresh Balances</>
+              <RefreshCw className="h-4 w-4" />
             )}
-          </button>
+          </Button>
         </div>
-
         {splits.error ? (
-          <div className="text-red-500 p-2 bg-red-50 rounded">
+          <div className="text-red-500 p-3 bg-red-50 rounded-lg">
             Error loading balances.{" "}
-            <button 
+            <Button 
+              variant="link"
+              size="sm"
               onClick={fetchSplits}
-              className="text-blue-500 hover:underline"
+              className="text-blue-600 hover:underline"
             >
               Retry
-            </button>
+            </Button>
           </div>
         ) : splits.length > 0 ? (
-          <ul className="mt-2">
+          <div className="space-y-2">
+            <div className="grid grid-cols-4 gap-4 font-semibold text-sm text-gray-500 pb-3 border-b">
+              <div>From</div>
+              <div></div>
+              <div>To</div>
+              <div className="text-right">Amount</div>
+            </div>
             {splits.map((split, index) => (
-              <li key={`${split.payer}-${split.receiver}-${index}`} className="p-2 border-b flex justify-between gap-10">
+              <div 
+                key={`${split.payer}-${split.receiver}-${index}`} 
+                className="grid grid-cols-4 gap-4 items-center py-3 border-b last:border-b-0 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <div className="font-medium text-gray-800">{split.payer}</div>
                 <div>
-                <strong>{split.payer}</strong> owes ₹{split.amount} to{" "}
-                <strong>{split.receiver}</strong>
+                  <ArrowRight className="h-4 w-4 text-purple-500" />
                 </div>
-                {/* <Button
-                  size="sm"
-                  onClick={() => handleSettle(split)}
-                  className="ml-4"
-                >
-                  Settle
-                </Button> */}
-              </li>
+                <div className="text-gray-700">{split.receiver}</div>
+                <div className="text-right font-bold text-purple-600">
+                  ₹{split.amount}
+                </div>
+              </div>
             ))}
-             
-          </ul>
+          </div>
         ) : (
-          <p>No balances found.</p>
+          <p className="text-gray-500">No balances found</p>
         )}
       </div>
 
-       {/* <div className="mt-5 border p-5 rounded-lg">
-      <h3 className="font-bold text-lg">Settlement History</h3>
-      {settlements.length > 0 ? (
-        <ul className="mt-2">
-          {settlements.map((settle) => (
-            <li key={settle.id} className="p-2 border-b">
-              <span className="font-medium">{settle.payerName}</span> paid ₹{settle.amount} to <span className="font-medium">{settle.receiverName}</span>
-              <span className="text-gray-500 text-sm ml-2">
-                {new Date(settle.settledAt).toLocaleString()}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-gray-500">No settlements yet</p>
-      )}
-    </div> */}
-      
+      {/* Settlement History Box */}
+      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div className="flex items-center gap-3 mb-6">
+          <History className="h-6 w-6 text-purple-600" />
+          <h2 className="text-2xl font-bold text-gray-800">Settlement History</h2>
+        </div>
+        {settlements.length > 0 ? (
+          <div className="space-y-2">
+            <div className="grid grid-cols-5 gap-4 font-semibold text-sm text-gray-500 pb-3 border-b">
+              <div>From</div>
+              <div></div>
+              <div>To</div>
+              <div className="text-right">Amount</div>
+              <div className="text-right">Date</div>
+            </div>
+            {settlements.map((settle) => (
+              <div 
+                key={settle.id} 
+                className="grid grid-cols-5 gap-4 items-center py-3 border-b last:border-b-0 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <div className="font-medium text-gray-800">{settle.payerName}</div>
+                <div>
+                  <ArrowRight className="h-4 w-4 text-blue-500" />
+                </div>
+                <div className="text-gray-700">{settle.receiverName}</div>
+                <div className="text-right font-bold text-blue-600">
+                  ₹{settle.amount}
+                </div>
+                <div className="text-right text-gray-500 text-sm">
+                  {new Date(settle.settledAt).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No settlements yet</p>
+        )}
+      </div>
     </div>
-  );
+);
+
 }
