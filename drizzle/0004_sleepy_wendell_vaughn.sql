@@ -1,0 +1,1 @@
+ALTER TABLE "splits" ADD COLUMN "isSettled" boolean DEFAULT false;
