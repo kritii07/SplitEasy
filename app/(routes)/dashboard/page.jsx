@@ -190,6 +190,7 @@ function Dashboard() {
               <button className="bg-white rounded-lg p-3 shadow-xs border hover:shadow-md transition-all flex flex-col items-center">
                 <span className="text-indigo-600 mb-1">➕</span>
                 <span className="text-sm font-medium">New Budget</span>
+                
               </button>
               <button className="bg-white rounded-lg p-3 shadow-xs border hover:shadow-md transition-all flex flex-col items-center">
                 <span className="text-indigo-600 mb-1">💸</span>

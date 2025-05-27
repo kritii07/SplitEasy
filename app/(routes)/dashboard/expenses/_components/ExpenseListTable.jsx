@@ -18,20 +18,21 @@ function ExpenseListTable({expensesList,refreshData}) {
          }
     }
   return (
-    <div className='mt-3'>
-      <h2 className='font-bold text-lg'>Latest Expenses</h2>
-       <div className='grid grid-cols-4 bg-slate-200 p-2 mt-3'>
-            <h2 className='font-bold'>Name</h2>
-            <h2 className='font-bold'>Amount</h2>
-            <h2 className='font-bold'>Date</h2>
-            <h2 className='font-bold'>Action</h2>
-       </div> 
+    <div className='mt-6'>
+      <h2 className='text-2xl font-bold text-gray-800 mb-4 rounded-xl'>Latest Expenses</h2>
+       <div className='grid grid-cols-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-xl'>
+                    <h2 className='font-semibold'>Name</h2>
+                    <h2 className='font-semibold'>Amount</h2>
+                    <h2 className='font-semibold'>Date</h2>
+                    <h2 className='font-semibold'>Actions</h2>
+                </div>
+                
 
        {expensesList.map((expenses,index)=>(
-        <div className='grid grid-cols-4 bg-slate-50 p-2'>
-            <h2>{expenses.name}</h2>
-            <h2>{expenses.amount}</h2>
-            <h2>{expenses.createdAt}</h2>
+        <div key={index} className='grid grid-cols-4 items-center p-4 hover:bg-gray-50 transition-colors '>
+            <h2  className='font-medium text-gray-800'>{expenses.name}</h2>
+            <h2 className='font-bold text-green-600'>₹{expenses.amount}</h2>
+            <h2  className='text-gray-600 font-medium'>{expenses.createdAt}</h2>
             <h2>
             <Trash className='text-red-600 cursor-pointer'
             onClick={()=>deleteExpense(expenses)}

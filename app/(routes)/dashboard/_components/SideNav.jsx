@@ -28,7 +28,7 @@ function SideNav() {
         },
         {
             id:4,
-            name:'Group Bills',
+            name:'Smart Split',
             icon: ShieldCheck,
             path: '/dashboard/groupbills'
         }
